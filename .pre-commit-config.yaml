@@ -6,8 +6,8 @@ repos:
     rev: v0.15.14 
     hooks:
       - id: ruff
-        args: [ --fix ] # Automatically fixes lint violations (like unused imports)
-      - id: ruff-format # Replaces Black entirely
+        args: [ --fix ]
+      - id: ruff-format
 
   # 2. Poetry: Ensures your pyproject.toml is healthy and consistent
   - repo: https://github.com/python-poetry/poetry
@@ -16,32 +16,27 @@ repos:
       - id: poetry-check
       - id: poetry-lock
 
-  # 3. Mypy: Type checking with your Redis stubs injected
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.1.0  
+  # 3. Mypy: Run locally through Poetry so it inherits your actual dependencies
+  - repo: local
     hooks:
       - id: mypy
-        additional_dependencies: [
-          'types-redis'
-        ]
+        name: mypy
+        entry: poetry run mypy
+        language: system
+        types: [python]
+
   - repo: https://github.com/koyeung/ko-poetry-audit-plugin
-    rev: 0.8.0a1  # Safe stable version tag
+    rev: 0.8.0a1  
     hooks:
       - id: poetry-audit
         args: []
+
   # 4. Local Hooks: Security audits and test coverage
-  # - repo: local
-  #   hooks:
-  #     # - id: poetry-audit
-  #     #   name: poetry-audit
-  #     #   # Prefix the entry command with 'poetry run' so pre-commit grabs the local wrapper
-  #     #   entry: poetry run poetry audit
-  #     #   language: system
-  #     #   pass_filenames: false
-  #     #   always_run: true
-  #     - id: pytest-coverage
-  #       name: Run Pytest with Coverage
-  #       entry: poetry run pytest tests/ --cov=. --cov-report=term-missing --cov-fail-under=55
-  #       language: system
-  #       pass_filenames: false
-  #       always_run: true
+  - repo: local
+    hooks:
+    - id: pytest-coverage
+      name: Run Pytest with Coverage
+      entry: poetry run pytest tests/ --cov=. --cov-report=term-missing --cov-fail-under=55
+      language: system
+      pass_filenames: false
+      always_run: true

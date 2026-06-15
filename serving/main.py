@@ -4,8 +4,8 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import joblib
-from google.cloud import storage
-from google.cloud import bigquery
+import google.cloud.storage as storage
+import google.cloud.bigquery as bigquery
 
 
 from typing import Any, Optional
@@ -37,7 +37,7 @@ def load_model():
         local_path = "./best_forecast_model.pkl"
     else:
         local_path = download_model(gcs_path)
-    local_path = "./best_forecast_model.pkl"
+    local_path = "./models/best_forecast_model.pkl"
 
     # Corrected: use joblib to safely open the compressed .pkl file
     MODEL = joblib.load(local_path)
