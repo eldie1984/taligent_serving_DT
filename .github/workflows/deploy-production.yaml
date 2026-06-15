@@ -21,19 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.8.2 # Pins Poetry version for stability
+          version: 2.4.1 # Matches the version in your pre-commit config
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      # Load cached venv if poetry.lock hasn't changed
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v4
@@ -43,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction
 
   # 2. BUILD & PUSH DOCKER IMAGE
   build-and-push:
