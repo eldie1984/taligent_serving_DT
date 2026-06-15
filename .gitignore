@@ -1,0 +1,6 @@
+__pycache__/
+gentle-habitat-499210-h9-2f193bbf14b4.json
+serving/best_forecast_model.joblib
+.gitignore
+models/
+results/
