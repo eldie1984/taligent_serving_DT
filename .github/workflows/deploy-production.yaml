@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
+  pull_request:
 
 env:
   PROJECT_ID: gentle-habitat-499210-h9
