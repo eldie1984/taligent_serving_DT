@@ -133,7 +133,8 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: models/best_forecast_model.pkl
-          destination: taligent-ml-models/models/licor_forecaster/${{ github.sha }}/model.pkl
+          destination: taligent-ml-models/models/licor_forecaster/${{ github.sha }}
+          parent: false
 
   # 4. DEPLOY TO CLOUD RUN
   deploy:
@@ -157,6 +158,8 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          env_vars: |
+            GCS_MODEL_PATH=gs://${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/best_forecast_model.pkl
           flags: |
             --allow-unauthenticated
             --memory=2Gi
