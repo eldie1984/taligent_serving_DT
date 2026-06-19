@@ -4,3 +4,5 @@ serving/best_forecast_model.joblib
 .gitignore
 models/
 results/
+.DS_Store
+.env
