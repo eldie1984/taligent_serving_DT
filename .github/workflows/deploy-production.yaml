@@ -92,32 +92,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.13'
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 2.4.1 # FIX: Matched poetry version with the test step
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+      # - name: Install Poetry
+      #   uses: snok/install-poetry@v1
+      #   with:
+      #     version: 2.4.1 # FIX: Matched poetry version with the test step
+      #     virtualenvs-create: true
+      #     virtualenvs-in-project: true
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      # - name: Load cached venv
+      #   id: cached-poetry-dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: .venv
+      #     key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Install dependencies
-        # FIX: Removed 'if' cache block to guarantee environment stability
-        run: poetry install --no-interaction --no-root
+      # - name: Install dependencies
+      #   # FIX: Removed 'if' cache block to guarantee environment stability
+      #   run: poetry install --no-interaction --no-root
 
-      - name: Train Model
-        run: |
-          poetry run python training/training.py
+      # - name: Train Model
+      #   run: |
+      #     poetry run python training/training.py
 
       - name: Google Auth
         uses: google-github-actions/auth@v2
@@ -128,7 +128,7 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: models/best_forecast_model.pkl
-          destination: ${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/
+          destination: ${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/model.pkl
 
   # 4. DEPLOY TO CLOUD RUN
   deploy:
