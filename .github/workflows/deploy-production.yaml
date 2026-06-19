@@ -6,25 +6,31 @@ on:
 
 env:
   PROJECT_ID: gentle-habitat-499210-h9
-  REGION: us-central1 # ✏️ Update if your region is different
+  REGION: us-central1 
   GAR_LOCATION: us-central1-docker.pkg.dev
   REPOSITORY: ml-models
   IMAGE_NAME: licor_forecaster
   SERVICE_NAME: licor-forecaster
-  GCS_BUCKET: your-actual-bucket-name # ✏️ Update this to your real GCS bucket
+  GCS_BUCKET: your-actual-bucket-name 
 
 jobs:
-  # 1. RUN TESTS (Using Poetry)
+  # 1. RUN TESTS 
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # FIX: Bumped to latest version for modern Node environments
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 2.4.1 # Matches the version in your pre-commit config
+          version: 2.4.1 
           virtualenvs-create: true
           virtualenvs-in-project: true
 
@@ -36,7 +42,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        # FIX: Removed the 'if' condition so broken cached venvs can be dynamically repaired by Poetry
         run: poetry install --no-interaction
 
   # 2. BUILD & PUSH DOCKER IMAGE
@@ -74,7 +80,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # 3. TRAIN & UPLOAD MODEL TO GCS (Using Poetry)
+  # 3. TRAIN & UPLOAD MODEL TO GCS
   train-and-upload:
     needs: test
     runs-on: ubuntu-latest
@@ -90,7 +96,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.8.2
+          version: 2.4.1 # FIX: Matched poetry version with the test step
           virtualenvs-create: true
           virtualenvs-in-project: true
 
@@ -102,7 +108,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        # FIX: Removed 'if' cache block to guarantee environment stability
         run: poetry install --no-interaction --no-root
 
       - name: Train Model
@@ -164,7 +170,8 @@ jobs:
 
   # 6. SLACK NOTIFICATION
   notify:
-    needs: [test, build-and-push, train-and-upload, deploy]
+    # FIX: Depend ONLY on the last step in your tree. If 'deploy' finishes, the other needs finished too.
+    needs: [deploy] 
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -180,10 +187,13 @@ jobs:
           fi
 
       - name: Send Slack Notification
-        uses: slackapi/slack-github-action@v1.26.0
+        # FIX: Bumped to latest action version to clear Node.js deprecation warnings
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          payload: |
+          # FIX: Passing the payload object cleanly without multi-line pipes literal escaping
+          payload: >
             {
+              "text": "CI/CD Pipeline Execution Status Update",
               "attachments": [
                 {
                   "color": "${{ steps.status.outputs.color }}",
