@@ -201,10 +201,12 @@ jobs:
           fi
 
       - name: Send Slack Notification
-        # FIX: Bumped to latest action version to clear Node.js deprecation warnings
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          # FIX: Passing the payload object cleanly without multi-line pipes literal escaping
+          # ADD THESE TWO LINES RIGHT HERE:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          
           payload: >
             {
               "text": "CI/CD Pipeline Execution Status Update",
@@ -223,5 +225,3 @@ jobs:
                 }
               ]
             }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
