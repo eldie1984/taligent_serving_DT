@@ -11,7 +11,7 @@ env:
   REPOSITORY: ml-models
   IMAGE_NAME: licor_forecaster
   SERVICE_NAME: licor-forecaster
-  GCS_BUCKET: your-actual-bucket-name 
+  GCS_BUCKET: taligent-ml-models
 
 jobs:
   # 1. RUN TESTS 
