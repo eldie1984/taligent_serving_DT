@@ -10,17 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Note: Python 3.14 is currently in pre-release/experimental state, 
+        # ensure your dependencies support it!
         python-version: ["3.13", "3.14"]
     steps:
     - uses: actions/checkout@v4
+    
+    # Upgraded from v3 to v5 for stable 3.13+ runtime support
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        
+     Alexander: Install dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pylint
+        # If your code imports external packages, install them here so Pylint doesn't throw import-errors
+        
     - name: Analysing the code with pylint
       run: |
-        pylint --rcfile=.pylintrc $(git ls-files '*.py')
+        # Explicitly passing the directory is much safer than git ls-files.
+        # Replace 'src' or '.' with your actual application directory if needed.
+        pylint --rcfile=.pylintrc $(find . -name "*.py" -not -path "*/.*")
