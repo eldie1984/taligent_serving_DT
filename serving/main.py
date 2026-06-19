@@ -102,6 +102,52 @@ def predict(payload: ForecastRequest):
     }
 
 
+@app.get("/weekly")
+def predict_weekly():
+    # 1. Fetch the pre-calculated feature dataframe specifically for the weekly view
+    # (Assuming this function handles its own date windowing logic internally)
+    features_df = get_data_forecast_request_weekly()
+
+    logger.info("---------- PROCESSED FEATURE DATAFRAME FOR WEEKLY INPUT ----------")
+    logger.info(f"\n{features_df.to_string(index=False)}")
+    logger.info("------------------------------------------------------------------")
+
+    # 2. Safety check to make sure data was returned
+    if features_df.empty:
+        raise HTTPException(
+            status_code=404,
+            detail="Could not calculate feature matrices for specific target week. Check historical row distribution.",
+        )
+
+    # 3. One-hot encode counties and align columns to match the structural shape of your model
+    prepared_df = prepare_features(features_df)
+
+    # 4. Check that the model artifact is loaded and active
+    if MODEL is None:
+        logger.error("Prediction failed: Model artifact was never successfully loaded.")
+        raise HTTPException(
+            status_code=500,
+            detail="Model is not initialized. Please check server deployment logs.",
+        )
+
+    # 5. Run inference across the rows provided by your weekly dataframe
+    predictions = MODEL.predict(prepared_df)
+    predictions_list = predictions.tolist()
+
+    # 6. Extract target info dynamically from the dataframe if available,
+    # otherwise fallback to generalized keys.
+    # (Assuming 'county' and 'ds' columns exist in your dataframe after your pipeline runs)
+    county_output = (
+        features_df["county"].iloc[0] if "county" in features_df.columns else "UNKNOWN"
+    )
+
+    return {
+        "county": county_output,
+        "daily_breakdown": predictions_list,
+        "total_weekly_forecast": sum(predictions_list),
+    }
+
+
 @app.get("/healthz")
 def health_check():
     return {"status": "healthy"}
@@ -283,6 +329,41 @@ def get_data_forecast_request(payload: ForecastRequest) -> pd.DataFrame:
             raise HTTPException(
                 status_code=400,
                 detail=f"No data returned from BigQuery for county {payload.county} in specified historical range.",
+            )
+
+        return prepare_time_series_data(historical_df)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error querying BigQuery: {str(e)}"
+        )
+
+
+def get_data_forecast_request_weekly() -> pd.DataFrame:
+    try:
+        bq_client = bigquery.Client()
+        query = """
+            SELECT 
+                invoice_and_item_number,
+                date,
+                county,
+                bottles_sold,
+                sale_dollars,
+                volume_sold_liters
+            FROM `bigquery-public-data.iowa_liquor_sales.sales` 
+            WHERE date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 40 DAY) AND CURRENT_DATE()
+            ORDER BY date ASC
+        """
+
+        logger.info("Executing BigQuery pull for weekly forecast")
+        query_job = bq_client.query(query)
+        historical_df = query_job.to_dataframe()
+
+        if historical_df.empty:
+            raise HTTPException(
+                status_code=400,
+                detail="No data returned from BigQuery for weekly forecast.",
             )
 
         return prepare_time_series_data(historical_df)
