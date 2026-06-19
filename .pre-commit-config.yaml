@@ -31,12 +31,17 @@ repos:
       - id: poetry-audit
         args: []
 
-  # 4. Local Hooks: Security audits and test coverage
+  # 4. Local Hooks: Security audits, test coverage, and linting
   - repo: local
     hooks:
-    - id: pytest-coverage
-      name: Run Pytest with Coverage
-      entry: poetry run pytest tests/ --cov=. --cov-report=term-missing --cov-fail-under=55
-      language: system
-      pass_filenames: false
-      always_run: true
+      - id: pytest-coverage
+        name: Run Pytest with Coverage
+        entry: poetry run pytest tests/ --cov=. --cov-report=term-missing --cov-fail-under=55
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: pylint
+        name: pylint
+        entry: poetry run pylint --rcfile=./.github/config/.pylintrc
+        language: system
+        types: [python]
