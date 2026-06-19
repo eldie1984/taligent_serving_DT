@@ -95,7 +95,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.13'
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -117,7 +117,7 @@ jobs:
 
       - name: Train Model
         run: |
-          poetry run python train.py --output model.pkl
+          poetry run python training/train.py
 
       - name: Google Auth
         uses: google-github-actions/auth@v2
@@ -127,7 +127,7 @@ jobs:
       - name: Upload Model to GCS
         uses: google-github-actions/upload-cloud-storage@v2
         with:
-          path: model.pkl
+          path: models/best_forecast_model.pkl
           destination: ${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/
 
   # 4. DEPLOY TO CLOUD RUN
