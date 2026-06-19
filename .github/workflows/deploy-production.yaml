@@ -117,7 +117,7 @@ jobs:
 
       - name: Train Model
         run: |
-          poetry run python training/train.py
+          poetry run python training/training.py
 
       - name: Google Auth
         uses: google-github-actions/auth@v2
