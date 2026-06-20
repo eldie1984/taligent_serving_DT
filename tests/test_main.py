@@ -34,9 +34,9 @@ def mock_model():
 class TestHealthCheck:
     """Test health check endpoint"""
 
-    def test_healthz_returns_healthy(self, client):
-        """Test that /healthz returns healthy status"""
-        response = client.get("/healthz")
+    def test_health_returns_healthy(self, client):
+        """Test that /health returns healthy status"""
+        response = client.get("/health")
         assert response.status_code == 200
         assert response.json() == {"status": "healthy"}
 
