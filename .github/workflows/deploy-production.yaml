@@ -165,7 +165,7 @@ jobs:
             --max-instances=10
             --timeout=300
           env_vars: |
-            GCS_MODEL_PATH=gs://${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/model.pkl
+            GCS_MODEL_PATH=gs://${{ env.GCS_BUCKET }}/models/licor_forecaster/${{ github.sha }}/best_forecast_model.pkl
 
       # 5. HEALTH CHECK
       - name: Verify Service Health
