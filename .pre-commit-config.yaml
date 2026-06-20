@@ -42,6 +42,6 @@ repos:
         always_run: true
       - id: pylint
         name: pylint
-        entry: poetry run pylint --rcfile=./.github/config/.pylintrc
+        entry: poetry run pylint --rcfile=./.github/workflows/.pylintrc
         language: system
         types: [python]

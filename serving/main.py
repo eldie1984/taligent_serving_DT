@@ -34,10 +34,9 @@ def load_model():
     gcs_path = os.environ.get("GCS_MODEL_PATH")
     if not gcs_path:
         logger.warning("GCS_MODEL_PATH not found. Falling back to local file path.")
-        local_path = "./best_forecast_model.pkl"
+        local_path = "./models/best_forecast_model.pkl"
     else:
         local_path = download_model(gcs_path)
-    local_path = "./models/best_forecast_model.pkl"
 
     # Corrected: use joblib to safely open the compressed .pkl file
     MODEL = joblib.load(local_path)
